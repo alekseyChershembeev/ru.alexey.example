@@ -27,7 +27,7 @@ import java.util.concurrent.FutureTask;
 public class Controller  {
 
 
-    private ResourceBundle resources;
+    // --Commented out by Inspection (12.12.2018 23:57):private ResourceBundle resources;
 
     @FXML
     private URL location;
@@ -38,7 +38,7 @@ public class Controller  {
 
 
     @FXML
-    private ListView<String> listViewforChooseDirectory;
+    private ListView<String> listViewForChooseDirectory;
     @FXML
     private Button chooseDirectoryButton;
 
@@ -74,7 +74,7 @@ public class Controller  {
 //
 //
 //        if (selectedFile != null){
-//            ListviewforChooseFile.getItems().add(selectedFile.getAbsolutePath());
+//            ListviewForChooseFile.getItems().add(selectedFile.getAbsolutePath());
 //
 //
 //        }else {
@@ -108,7 +108,7 @@ public class Controller  {
                 File file = directoryChooser.showDialog(null);
                 if (file != null) {
 
-                    listViewforChooseDirectory.getItems().add(file.getAbsolutePath());
+                    listViewForChooseDirectory.getItems().add(file.getAbsolutePath());
                     treeViewList.setRoot(nodesForDirectory(file));
                     treeView.setRoot(treeViewList.getRoot());
 
@@ -123,7 +123,7 @@ public class Controller  {
 
 
                 Callable<HashMap<File, ArrayList<Long>>> callable = new Search();
-                FutureTask futureTask = new FutureTask(callable);
+                FutureTask<HashMap<File, ArrayList<Long>>> futureTask = new FutureTask<>(callable);
                 new Thread(futureTask).start();
             }
 

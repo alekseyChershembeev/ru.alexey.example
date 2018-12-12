@@ -50,17 +50,11 @@ public class Search  implements Callable<HashMap<File, ArrayList<Long>>>{
                 randomAccessFile.seek(position);
                 randomAccessFile.read(fileContent);
                 if (new String(fileContent, ENCODING).indexOf(text) >= 0) {
-                    ArrayList<Long> longs = new ArrayList<>();
-                    longs.add(position);
-
-
 
 
                     return true;
                 }
             }
-
-
 
 
         } catch (IOException ex) {
@@ -164,7 +158,7 @@ public class Search  implements Callable<HashMap<File, ArrayList<Long>>>{
          int buffer = BUFFER;
 
 
-        double countCurrentFile = (Math.ceil((double)(file.length())/buffer));
+      //  double countCurrentFile = (Math.ceil((double)(file.length())/buffer));
 
 
 
@@ -205,7 +199,7 @@ public class Search  implements Callable<HashMap<File, ArrayList<Long>>>{
         int buffer = BUFFER;
 
 
-        double countCurrentFile = (Math.ceil((double)(file.length())/buffer));
+       // double countCurrentFile = (Math.ceil((double)(file.length())/buffer));
 
 
 
@@ -242,7 +236,7 @@ public class Search  implements Callable<HashMap<File, ArrayList<Long>>>{
     }
     @Override
 
-    public HashMap<File, ArrayList<Long>> call() throws Exception {
+    public HashMap<File, ArrayList<Long>> call() {
 
 //здесь должен был быть новый поток, но так и не вышло XD
 
