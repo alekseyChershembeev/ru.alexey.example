@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.collections.FXCollections?>
+<?import javafx.collections.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.*?>
 <?import java.lang.*?>
+
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: #2E3348;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Controller">
    <children>
       <AnchorPane layoutY="89.0" prefHeight="679.0" prefWidth="1024.0" style="-fx-background-color: fafafafa;">
@@ -13,7 +14,7 @@
             <TabPane id="MainTabPane" fx:id="tabPane" layoutX="315.0" prefHeight="679.0" prefWidth="710.0" tabClosingPolicy="ALL_TABS" />
          </children></AnchorPane>
       <TextField fx:id="text_Field" layoutX="281.0" layoutY="59.0" prefHeight="29.0" prefWidth="472.0" promptText="enter text" style="-fx-border-color: silver; -fx-background-radius: 5;" />
-      <Button fx:id="chooseDirectoryButton" layoutX="762.0" layoutY="45.0" mnemonicParsing="false" onAction="#chooseDirectoryButtonAction" prefHeight="30.0" prefWidth="133.0" style="-fx-background-color: F39C63;" text="Search Directory" textFill="WHITE">
+      <Button fx:id="chooseDirectoryButton" layoutX="762.0" layoutY="12.0" mnemonicParsing="false" onAction="#chooseDirectoryButtonAction" prefHeight="63.0" prefWidth="133.0" style="-fx-background-color: F39C63;" text="Search Directory" textFill="WHITE">
          <font>
             <Font size="14.0" />
          </font>
@@ -56,10 +57,5 @@
             </FXCollections>
          </items>
       </ComboBox>
-      <Button fx:id="interruptButton" layoutX="762.0" layoutY="8.0" mnemonicParsing="false" onAction="#interruptButton" prefHeight="25.0" prefWidth="133.0" style="-fx-background-color: F39C63;" text="Interrupt" textFill="WHITE">
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Button>
    </children>
 </AnchorPane>

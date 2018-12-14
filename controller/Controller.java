@@ -9,15 +9,13 @@ import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import model.Config;
 import model.Search;
-
-
-
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
@@ -27,18 +25,15 @@ import java.util.concurrent.FutureTask;
 public class Controller  {
 
 
-    // --Commented out by Inspection (12.12.2018 23:57):private ResourceBundle resources;
-
     @FXML
     private URL location;
-
 
     @FXML
     private   TextField text_Field;
 
-
     @FXML
     private ListView<String> listViewForChooseDirectory;
+
     @FXML
     private Button chooseDirectoryButton;
 
@@ -58,52 +53,28 @@ public class Controller  {
 
     @FXML
     private TabPane tabPane;
-    @FXML
-    private Button interruptButton;
 
 
 
-//возможность выбирать файлы напрямую.
-//    public void ChooseButtonAction(javafx.event.ActionEvent actionEvent) {
-//       final FileChooser fc = new FileChooser();
-//
-//        fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("*log files","*.log"));
-//        fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("*txt files","*.txt"));
-//        fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("All Files","*.*"));
-//        File selectedFile = fc.showOpenDialog(null);
-//
-//
-//        if (selectedFile != null){
-//            ListviewForChooseFile.getItems().add(selectedFile.getAbsolutePath());
-//
-//
-//        }else {
-//            System.out.println("File is not valid");
-//            Alert alert = new Alert(Alert.AlertType.ERROR);
-//            alert.setHeaderText("Could not open File");
-//            alert.setContentText("The file is invalid.");
-//            alert.showAndWait();
-//        }
-//
-//    }
+    /*
+       The main program method responsible for building a treeView with the found text.
+       it starts after treeView a new thread in which a map is formed with all the files and buffer positions
+       in which the text is found.
 
-
-
-    public void chooseDirectoryButtonAction(javafx.event.ActionEvent actionEvent) {
+    */
+public void chooseDirectoryButtonAction(javafx.event.ActionEvent actionEvent) {
 
         chooseDirectoryButton.setOnAction(new EventHandler<ActionEvent>() {
 
             final TreeView<String> treeViewList = new TreeView<>();
 
-
-
-
             @Override
             public void handle(ActionEvent event) {
 
-
                 String userChoice = comboBox.getSelectionModel().getSelectedItem();
-                if (userChoice!=null) Config.ENCODING =userChoice;
+                if (userChoice!=null) {
+                    Config.ENCODING = userChoice;
+                }
                 final DirectoryChooser directoryChooser = new DirectoryChooser();
                 File file = directoryChooser.showDialog(null);
                 if (file != null) {
@@ -111,7 +82,6 @@ public class Controller  {
                     listViewForChooseDirectory.getItems().add(file.getAbsolutePath());
                     treeViewList.setRoot(nodesForDirectory(file));
                     treeView.setRoot(treeViewList.getRoot());
-
 
                 } else {
                     System.out.println("Folder is not valid");
@@ -121,7 +91,6 @@ public class Controller  {
                     alert.showAndWait();
                 }
 
-
                 Callable<HashMap<File, ArrayList<Long>>> callable = new Search();
                 FutureTask<HashMap<File, ArrayList<Long>>> futureTask = new FutureTask<>(callable);
                 new Thread(futureTask).start();
@@ -129,49 +98,50 @@ public class Controller  {
 
         });
 
-
     }
-
+    /*
+        method for finding files in the directory for chooseDirectoryButtonAction
+    */
     private TreeItem<String> nodesForDirectory(File directory) {
         TreeItem<String> root = new TreeItem<>(directory.getName());
 
+        for (File file : Objects.requireNonNull(directory.listFiles())) {
+
+            System.out.println("Loading " + file.getName());
+
+            if (file.isDirectory()) {
+                root.getChildren().add(nodesForDirectory(file));
+
+            } else if (booleanMask(file)) {
+                Search.positions.put(new File(file.getAbsolutePath()),text_Field.getText());//добваляем в мапу файлы и пустой лонг
 
 
-            for (File file : Objects.requireNonNull(directory.listFiles())) {
-                System.out.println("Loading " + file.getName());
+                if (new Search().booleanSearchText(file, text_Field.getText())) {
 
-                if (file.isDirectory()) {
-                    root.getChildren().add(nodesForDirectory(file));
-
-                } else if (booleanMask(file)) {
-                    if (new Search().booleanSearchText(file, text_Field.getText())) {
-
-                        TreeItem<String> currentTreeItem = new TreeItem<String>(file.getAbsolutePath());
+                    TreeItem<String> currentTreeItem = new TreeItem<>(file.getAbsolutePath());
 
 
-                        root.getChildren().add(currentTreeItem);
-                    }
+                    root.getChildren().add(currentTreeItem);
                 }
-
             }
 
-
-
+        }
 
         return root;
     }
 
+
+    /*
+    method for determining the mask of the required files for nodesForDirectory
+    */
     private boolean booleanMask(File file)
     {
-
-
         return file.getName().substring(file.getName().indexOf('.')).equals(textFieldMask.getText());
-
     }
 
-
-
-
+    /*
+    method for calling text in tabPane (with the first entry of the search text) in new tabs
+    */
     public void mouseClick(javafx.scene.input.MouseEvent mouseEvent) {
 
         if (mouseEvent.getClickCount() == 2) {
@@ -194,75 +164,85 @@ public class Controller  {
 
         }
     }
+    private int countUpDown = 1;
+
+
+   /*
+   search method Up by HashMap by buffer with found text
+   */
     @FXML
-
     void upButton(ActionEvent event) {
-
         upButton.setOnAction(event1 -> {
 
+            File file = new File(tabPane.getSelectionModel().getSelectedItem().getText());
 
-            File currentFile = new File(tabPane.getSelectionModel().getSelectedItem().getText());
-            String currentString = text_Field.getText();
-            String currentText = new Search().searchStringTextForward(currentFile,currentString);
+            for (Map.Entry<File, ArrayList<Long>> entry : Search.positionsAll.entrySet()) {
+                if (entry.getKey().equals(file)) {
+                    ArrayList<Long> list = entry.getValue();
+                    if (countUpDown < list.size()) {
+                        for (int p = countUpDown; p < list.size(); ) {
+                            try {
+
+                                byte [] data = new Search().readSomeDataFromFile(file, list.get(p), Config.BUFFER);
+                                String text = new String(data);
+                                countUpDown++;
+                                TextArea textArea = new TextArea(text);
 
 
-            TextArea textArea = new TextArea(currentText);
-            //if (textArea.equals("")){return;} надо чтобы не пропадал текст, еслинечегов выводить
 
+                                upButton.defaultButtonProperty().bind(tabPane.getSelectionModel().getSelectedItem().selectedProperty());
+                                tabPane.getSelectionModel().getSelectedItem().setContent(textArea);
 
+                                return;
 
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
 
-            upButton.defaultButtonProperty().bind(tabPane.getSelectionModel().getSelectedItem().selectedProperty());
-            tabPane.getSelectionModel().getSelectedItem().setContent(textArea);
-
+                }
+            }
 
         });
 
     }
 
-
+    /*
+    Search method Down by HashMap by buffer with found text
+    */
     @FXML
     void downButton(ActionEvent event) {
 
 
         downButton.setOnAction(event1 -> {
 
+            File file = new File(tabPane.getSelectionModel().getSelectedItem().getText());
 
-
-            File currentFile = new File(tabPane.getSelectionModel().getSelectedItem().getText());
-            String currentString = text_Field.getText();
-            String currentText = new Search().searchStringTextBack(currentFile,currentString);
-
-            TextArea textArea = new TextArea(currentText);
-
-
-            upButton.defaultButtonProperty().bind(tabPane.getSelectionModel().getSelectedItem().selectedProperty());
-            tabPane.getSelectionModel().getSelectedItem().setContent(textArea);
-
+            for (Map.Entry<File, ArrayList<Long>> entry : Search.positionsAll.entrySet()) {
+                if (entry.getKey().equals(file)) {
+                    ArrayList<Long> list = entry.getValue();
+                    if (countUpDown != 0) {
+                        for (int p = countUpDown; p < list.size();) {
+                            try {
+                                byte [] data = new Search().readSomeDataFromFile(file, list.get(p), Config.BUFFER);
+                                String text = new String(data);
+                                countUpDown--;
+                                TextArea textArea = new TextArea(text);
+                                downButton.defaultButtonProperty().bind(tabPane.getSelectionModel().getSelectedItem().selectedProperty());
+                                tabPane.getSelectionModel().getSelectedItem().setContent(textArea);
+                                return;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
         } );
 
     }
 
-        @FXML
-     void interruptButton(ActionEvent actionEvent) {
-    }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

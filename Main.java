@@ -6,6 +6,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/*
+JavaFx was used for GUI (it creates a page through FXML file sample.fxml in View)
+*/
 public class Main extends Application {
 
     @Override
